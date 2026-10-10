@@ -23,9 +23,13 @@ monitor-de-salud/
 │   ├── index.html
 │   └── vite.config.js
 ├── server/
+│   ├── app.js
+│   ├── index.js
 │   ├── db.js
-│   ├── server.js
+│   ├── routes/
 │   └── .env.example
+├── api/
+│   └── index.js
 ├── package.json
 └── README.md
 ```
@@ -71,25 +75,34 @@ npm run dev
 
 Vite redirige `/api/*` al servidor Express mediante proxy.
 
-## Producción
+## Despliegue en Vercel
+
+El repo ya está preparado: el frontend (Vite) se sirve como estático y la API Express corre como una única función serverless (`api/index.js`) que carga `server/app.js`.
+
+1. Importá el repo en Vercel (Root Directory: la raíz del repo; el resto lo toma de `vercel.json`).
+2. En **Settings → Environment Variables** cargá:
+
+| Variable | Valor |
+| --- | --- |
+| `MONGODB_URI` | cadena de conexión de MongoDB Atlas |
+| `JWT_SECRET` | secreto largo (`openssl rand -hex 32`) |
+| `CLIENT_URL` | URL pública, ej. `https://tu-app.vercel.app` (se usa en CORS y en el link del mail de recuperación) |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` | opcionales; sin SMTP el mail solo se loguea |
+
+3. En MongoDB Atlas → **Network Access**, permití conexiones desde `0.0.0.0/0` (las IPs de Vercel no son fijas).
+4. Deploy. Verificá con `https://tu-app.vercel.app/api/health`.
+
+Notas:
+
+- `NODE_ENV` lo define Vercel (`production`); no lo cargues a mano.
+- Los rate limiters usan memoria, así que el límite es por instancia serverless. Para un límite global habría que usar un store externo (Redis/Upstash).
+- Nunca subas `server/.env` a git (ya está en `.gitignore`).
+
+## Producción local (sin Vercel)
 
 ```bash
 npm run build
 npm start
 ```
 
-Express servirá la aplicación compilada de Vite desde `client/dist`.
-
-## Cambios realizados
-
-- Eliminado TypeScript: `.ts` y `.tsx` pasaron a `.js` y `.jsx`.
-- Eliminado Tailwind CSS.
-- Eliminada la dependencia de Google Gemini.
-- Eliminada Motion porque no se utilizaba.
-- Eliminado el servidor híbrido que mezclaba Vite y Express.
-- Separados frontend y backend.
-- Vite queda como servidor de desarrollo del frontend.
-- Express queda como API y servidor de producción.
-- MongoDB/Mongoose queda como persistencia principal, sin almacenamiento JSON de respaldo.
-- Eliminados `tsconfig.json`, `bun.lock`, `index.css`, `metadata.json` y archivos del proyecto anterior que ya no son necesarios.
-- CSS de la interfaz permanece organizado mediante CSS Modules.
+`npm start` levanta solo la API; para servir `client/dist` habría que agregar `express.static` en `server/index.js`.

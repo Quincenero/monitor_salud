@@ -11,6 +11,7 @@ import {
 } from '../utils/jwt.js';
 import { requireAuth } from '../middleware/auth.js';
 import { sendPasswordResetEmail } from '../utils/mailer.js';
+import { getClientUrl } from '../utils/clientUrl.js';
 
 const router = Router();
 
@@ -169,7 +170,7 @@ router.post('/forgot-password', forgotLimiter, async (req, res, next) => {
         expiresAt: new Date(Date.now() + 30 * 60 * 1000),
       });
 
-      const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+      const clientUrl = getClientUrl();
       const resetUrl = `${clientUrl}/reset-password?token=${rawToken}`;
 
       try {

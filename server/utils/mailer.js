@@ -2,6 +2,14 @@ import nodemailer from 'nodemailer';
 
 let transporter = null;
 
+function escapeHtml(str = '') {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 function getTransporter() {
   if (transporter) return transporter;
 
@@ -42,7 +50,7 @@ export async function sendPasswordResetEmail({ to, name, resetUrl }) {
     to,
     subject: 'Recuperación de contraseña',
     text: `Hola ${name},\n\nRecibimos un pedido para restablecer tu contraseña.\n\nAbrí este link (válido 30 minutos):\n${resetUrl}\n\nSi no fuiste vos, ignorá este mensaje.`,
-    html: `<p>Hola ${name},</p>
+    html: `<p>Hola ${escapeHtml(name)},</p>
            <p>Recibimos un pedido para restablecer tu contraseña.</p>
            <p>Hacé click en el siguiente link (válido 30 minutos):</p>
            <p><a href="${resetUrl}">${resetUrl}</a></p>

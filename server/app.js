@@ -6,16 +6,20 @@ import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth.js';
 import recordsRoutes from './routes/records.js';
 import { notFoundApi, errorHandler } from './middleware/errors.js';
+import { getAllowedOrigins } from './utils/clientUrl.js';
 
 const app = express();
 
-// En producción, Vercel sirve el frontend estático. En dev, Vite lo sirve.
-// El CLIENT_URL en prod es el dominio de Vercel; en dev es localhost:5173.
-const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
+// Vercel (y cualquier proxy inverso) pone la IP real del cliente en
+// X-Forwarded-For. Sin esto, express-rate-limit ve la IP del proxy y
+// todos los usuarios comparten el mismo límite de intentos.
+app.set('trust proxy', 1);
+app.disable('x-powered-by');
 
+// En producción, Vercel sirve el frontend estático y la API en el mismo origen.
 app.use(
   cors({
-    origin: CLIENT_URL.split(',').map((s) => s.trim()),
+    origin: getAllowedOrigins(),
     credentials: true,
   })
 );
@@ -29,7 +33,12 @@ app.get('/api/health', (req, res) => {
 
 app.get('/api/status', async (req, res) => {
   const { getDatabaseStatus } = await import('./db.js');
-  res.json(getDatabaseStatus());
+  const status = getDatabaseStatus();
+  // En producción no exponemos nombre de la base ni config interna.
+  if (process.env.NODE_ENV === 'production') {
+    return res.json({ isMongoConnected: status.isMongoConnected });
+  }
+  res.json(status);
 });
 
 // Rutas
