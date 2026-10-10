@@ -1,0 +1,261 @@
+/* RecordsList.module.css */
+.listContainer {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  overflow: hidden;
+}
+
+.listHeader {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.titleArea h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.2rem 0;
+}
+
+.titleArea p {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.filterBar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.searchBox {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchInput {
+  padding: 0.45rem 0.75rem;
+  padding-left: 2rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.825rem;
+  outline: none;
+  width: 220px;
+}
+
+.searchInput:focus {
+  border-color: #0d9488;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 0.6rem;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.contextSelect {
+  padding: 0.45rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.825rem;
+  background-color: #ffffff;
+  outline: none;
+  cursor: pointer;
+}
+
+.exportBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.85rem;
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.exportBtn:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+/* Table */
+.tableWrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+.th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+  vertical-align: middle;
+}
+
+.tr:hover {
+  background-color: #f8fafc;
+}
+
+.valCell {
+  display: flex;
+  flex-direction: column;
+}
+
+.valMain {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #0f172a;
+}
+
+.valSub {
+  font-size: 0.725rem;
+  font-weight: 600;
+  margin-top: 0.15rem;
+}
+
+.contextPill {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.725rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.notesText {
+  color: #64748b;
+  font-size: 0.8rem;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actionBtns {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.iconBtn {
+  background: none;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.35rem;
+  color: #64748b;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.iconBtn:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.iconBtnDanger:hover {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.emptyRow {
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: #64748b;
+}
+
+/* Edit Modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 60;
+  padding: 1rem;
+}
+
+.modalBox {
+  background-color: #ffffff;
+  border-radius: 16px;
+  max-width: 580px;
+  width: 100%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modalHeader h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.modalBody {
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .listHeader {
+    padding: 1rem;
+  }
+  .filterBar {
+    width: 100%;
+  }
+  .searchInput {
+    width: 100%;
+  }
+}

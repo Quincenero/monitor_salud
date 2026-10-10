@@ -1,0 +1,64 @@
+# ============ Dependencies ============
+node_modules/
+**/node_modules/
+
+# ============ Env files (CRÍTICO) ============
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+.env.test
+**/.env
+**/.env.local
+**/.env.*.local
+**/.env.production
+**/.env.development
+**/.env.test
+
+# ============ Builds ============
+dist/
+build/
+client/dist/
+server/dist/
+**/dist/
+out/
+
+# ============ Vercel ============
+.vercel/
+.vercel
+
+# ============ Caches ============
+.cache/
+.vite/
+**/node_modules/.vite/
+.eslintcache
+coverage/
+
+# ============ Logs ============
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ============ Backups ============
+*.bak
+*.OLD
+*.old
+*.orig
+
+# ============ OS ============
+.DS_Store
+.DS_Store?
+Thumbs.db
+Desktop.ini
+
+# ============ IDE ============
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ============ Misc ============
+*.pid

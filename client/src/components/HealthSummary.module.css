@@ -1,0 +1,178 @@
+/* HealthSummary.module.css */
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.metricCard {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.35rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.metricCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.05);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.cardTitleWrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cardIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconGlucose {
+  background-color: #ecfeff;
+  color: #0891b2;
+}
+
+.iconBpm {
+  background-color: #fff1f2;
+  color: #e11d48;
+}
+
+.iconBp {
+  background-color: #f5f3ff;
+  color: #7c3aed;
+}
+
+.cardTitle {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.timeTag {
+  font-size: 0.725rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.valueRow {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.primaryValue {
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.unit {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-bottom: 0.85rem;
+}
+
+.statusOptimal {
+  background-color: #ecfdf5;
+  color: #047857;
+}
+
+.statusCaution {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+
+.statusWarning {
+  background-color: #fefce8;
+  color: #a16207;
+}
+
+.statusDanger {
+  background-color: #fef2f2;
+  color: #b91c1c;
+}
+
+.statsFooter {
+  border-top: 1px solid #f1f5f9;
+  padding-top: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.avgLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.avgValue {
+  font-weight: 700;
+  color: #1e293b;
+}
+
+/* Empty State Card */
+.emptyCard {
+  background-color: #ffffff;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  grid-column: 1 / -1;
+  color: #64748b;
+}
+
+.emptyTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0.75rem 0 0.25rem 0;
+}
+
+.emptyDesc {
+  font-size: 0.85rem;
+  max-width: 480px;
+  margin: 0 auto 1.25rem auto;
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  .summaryGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}

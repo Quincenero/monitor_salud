@@ -1,0 +1,307 @@
+/* RecordForm.module.css */
+.formCard {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.formHeader {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.formTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.25rem 0;
+}
+
+.formDesc {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  position: relative;
+}
+
+.inputLabel {
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.labelHint {
+  font-size: 0.725rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputField {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  padding-right: 3rem;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #0f172a;
+  background-color: #ffffff;
+  transition: all 0.15s ease;
+  outline: none;
+}
+
+.inputField:focus {
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12);
+}
+
+.unitSuffix {
+  position: absolute;
+  right: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+/* Split input for blood pressure */
+.bpSplitGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+/* Real-time clinical badge below each field */
+.feedbackBadge {
+  margin-top: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  line-height: 1.3;
+}
+
+.badgeOptimal {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.badgeCaution {
+  background-color: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+.badgeWarning {
+  background-color: #fefce8;
+  color: #854d0e;
+  border: 1px solid #fef08a;
+}
+
+.badgeDanger {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+/* Context selector chips */
+.sectionLabel {
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.contextChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.chipBtn {
+  padding: 0.4rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1.5px solid #e2e8f0;
+  background-color: #f8fafc;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chipBtn:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.chipActive {
+  background-color: #ccfbf1;
+  color: #0f766e;
+  border-color: #0d9488;
+}
+
+/* Secondary Inputs: Date & Notes */
+.secondaryRow {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.dateInput {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  color: #1e293b;
+  outline: none;
+  background-color: #ffffff;
+}
+
+.dateInput:focus {
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12);
+}
+
+.textareaField {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  color: #1e293b;
+  outline: none;
+  resize: vertical;
+  min-height: 60px;
+  font-family: inherit;
+  background-color: #ffffff;
+}
+
+.textareaField:focus {
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12);
+}
+
+/* Form Actions */
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.submitBtn {
+  background-color: #0d9488;
+  color: #ffffff;
+  padding: 0.65rem 1.4rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 4px rgba(13, 148, 136, 0.2);
+}
+
+.submitBtn:hover:not(:disabled) {
+  background-color: #0f766e;
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancelBtn {
+  background-color: #ffffff;
+  color: #475569;
+  padding: 0.65rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cancelBtn:hover {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+.alertBox {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.25rem;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.alertError {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.alertSuccess {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+@media (max-width: 768px) {
+  .formCard {
+    padding: 1.25rem;
+  }
+  .metricsGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .secondaryRow {
+    grid-template-columns: 1fr;
+  }
+}

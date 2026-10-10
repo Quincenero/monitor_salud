@@ -1,0 +1,150 @@
+/* HealthGuideModal.module.css */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 60;
+  padding: 1rem;
+}
+
+.modalCard {
+  background-color: #ffffff;
+  border-radius: 16px;
+  max-width: 720px;
+  width: 100%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+
+.modalHeader {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modalHeader h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 6px;
+}
+
+.closeBtn:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.modalContent {
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+.guideSection {
+  margin-bottom: 1.75rem;
+}
+
+.guideSection:last-child {
+  margin-bottom: 0;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.guideTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+.guideTable th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  padding: 0.6rem 0.85rem;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+}
+
+.guideTable td {
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.pillOptimal {
+  background-color: #ecfdf5;
+  color: #047857;
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.725rem;
+}
+
+.pillCaution {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.725rem;
+}
+
+.pillWarning {
+  background-color: #fefce8;
+  color: #a16207;
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.725rem;
+}
+
+.pillDanger {
+  background-color: #fef2f2;
+  color: #b91c1c;
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.725rem;
+}
+
+.disclaimerBox {
+  margin-top: 1.5rem;
+  padding: 0.85rem 1rem;
+  background-color: #f8fafc;
+  border-left: 3px solid #0d9488;
+  border-radius: 6px;
+  font-size: 0.775rem;
+  color: #475569;
+  line-height: 1.5;
+}
