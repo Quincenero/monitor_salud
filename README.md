@@ -98,6 +98,15 @@ Notas:
 - Los rate limiters usan memoria, así que el límite es por instancia serverless. Para un límite global habría que usar un store externo (Redis/Upstash).
 - Nunca subas `server/.env` a git (ya está en `.gitignore`).
 
+## Instalar como app (PWA)
+
+La app es instalable en Android (y iOS) sin pasar por ninguna tienda:
+
+- **Android (Chrome):** abrí la URL de Vercel, tocá el menú ⋮ → **Instalar app** (o **Agregar a la pantalla principal**). Queda con ícono propio y se abre a pantalla completa.
+- **iPhone (Safari):** botón Compartir → **Agregar a inicio**.
+
+Detalles técnicos: `client/public/manifest.webmanifest`, `client/public/sw.js` e íconos en `client/public/icons/`. El service worker cachea solo la interfaz; las llamadas a `/api/*` (datos de salud y sesión) **nunca** se cachean, así que sin conexión se ve la app pero no los registros. Requiere HTTPS (Vercel ya lo da).
+
 ## Producción local (sin Vercel)
 
 ```bash
