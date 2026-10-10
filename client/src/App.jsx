@@ -19,7 +19,6 @@ import { HealthCharts } from './components/HealthCharts';
 import { RecordForm } from './components/RecordForm';
 import { RecordsList } from './components/RecordsList';
 import { HealthGuideModal } from './components/HealthGuideModal';
-import { DbInfoModal } from './components/DbInfoModal';
 
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -33,7 +32,6 @@ import {
   PlusCircle,
   ListFilter,
   BookOpen,
-  Database,
   LogOut,
   User as UserIcon,
 } from 'lucide-react';
@@ -51,9 +49,7 @@ function AppShell() {
   const navigate = useNavigate();
 
   const [records, setRecords] = useState([]);
-  const [dbStatus, setDbStatus] = useState(null);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
-  const [isDbModalOpen, setIsDbModalOpen] = useState(false);
   const [isSeeding, setIsSeeding] = useState(false);
 
   // Cargar registros solo si hay sesión
@@ -77,23 +73,7 @@ function AppShell() {
     };
   }, [user]);
 
-  // Status de la DB
-  useEffect(() => {
-    if (!user) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        const data = await api('/api/status');
-        if (!cancelled) setDbStatus(data);
-      } catch {
-        // silencioso
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [user]);
-
+// Logout: cerrar sesión y redirigir a login
   async function handleLogout() {
     await logout();
     navigate('/login', { replace: true });
@@ -161,25 +141,7 @@ function AppShell() {
           </div>
 
           <div className={styles.navActions}>
-            <button
-              type="button"
-              className={`${styles.dbBadge} ${
-                dbStatus?.isMongoConnected
-                  ? styles.dbMongo
-                  : styles.dbLocal
-              }`}
-              onClick={() => setIsDbModalOpen(true)}
-            >
-              <span
-                className={`${styles.dbDot} ${
-                  dbStatus?.isMongoConnected
-                    ? styles.dotGreen
-                    : styles.dotBlue
-                }`}
-              />
-              {dbStatus?.isMongoConnected ? 'MongoDB' : 'Desconectado'}
-            </button>
-
+            
             <button
               type="button"
               className={styles.helpBtn}
@@ -189,7 +151,8 @@ function AppShell() {
               <span>Guía</span>
             </button>
 
-            <Link to="/profile" className={styles.helpBtn}>
+            <Link to="/profile" className={styles.helpBtn} 
+              title={'Perfil de ${user.name'}>
               <UserIcon size={14} />
               <span>{user.name}</span>
             </Link>
@@ -354,11 +317,6 @@ function AppShell() {
       <HealthGuideModal
         isOpen={isGuideOpen}
         onClose={() => setIsGuideOpen(false)}
-      />
-      <DbInfoModal
-        isOpen={isDbModalOpen}
-        onClose={() => setIsDbModalOpen(false)}
-        status={dbStatus}
       />
     </div>
   );

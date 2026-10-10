@@ -2,6 +2,7 @@ import './env.js';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 
 import authRoutes from './routes/auth.js';
 import recordsRoutes from './routes/records.js';
@@ -25,6 +26,7 @@ app.use(
 );
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
+app.use(helmet());
 
 // Health checks
 app.get('/api/health', (req, res) => {

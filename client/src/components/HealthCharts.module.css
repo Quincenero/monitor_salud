@@ -45,6 +45,13 @@
   padding: 0.25rem;
   border-radius: 10px;
   gap: 0.2rem;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.metricTabs::-webkit-scrollbar {
+  display: none;
 }
 
 .metricTabBtn {
@@ -149,6 +156,15 @@
   }
   .controlsWrap {
     width: 100%;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem; 
+    min-width: 0;
+  }
+  .metricTabs {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 }

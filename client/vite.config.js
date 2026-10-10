@@ -15,12 +15,34 @@ export default defineConfig({
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom'],
   },
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rolldownOptions: {
+      output: {
+        advancedChunks: {
+          groups: [
+            {
+              name: 'react-vendor',
+              test: /[\\/]node_modules[\\/](react|react-dom|react-router-dom|react-router)[\\/]/,
+            },
+            {
+              name: 'charts',
+              test: /[\\/]node_modules[\\/]recharts[\\/]/,
+            },
+            {
+              name: 'icons',
+              test: /[\\/]node_modules[\\/]lucide-react[\\/]/,
+            },
+          ],
+        },
+      },
+    },
+  },
   server: {
     proxy: {
       '/api': {
         target: 'http://localhost:5000',
         changeOrigin: true,
-        cookieDomainRewrite: '',   // ← limpia el Domain de la cookie
       },
     },
   },
