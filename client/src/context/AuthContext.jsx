@@ -46,13 +46,14 @@ export function AuthProvider({ children }) {
     return data.user;
   }, []);
 
-  const register = useCallback(async (name, email, password) => {
+    const register = useCallback(async (name, email, password) => {
     const data = await api('/api/auth/register', {
       method: 'POST',
       body: { name, email, password },
     });
-    setUser(data.user);
-    return data.user;
+    // Ya NO seteamos el user: primero tiene que verificar el email.
+    // Devolvemos el response completo para que Register.jsx decida qué hacer.
+    return data;
   }, []);
 
   const logout = useCallback(async () => {

@@ -1,8 +1,16 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { api } from '../utils/api';
 import styles from './AuthPages.module.css';
-import { Activity, AlertCircle, Mail, Lock } from 'lucide-react';
+import {
+  Activity,
+  AlertCircle,
+  Mail,
+  Lock,
+  RotateCw,
+  MailWarning,
+} from 'lucide-react';
 
 export default function Login() {
   const { login } = useAuth();
@@ -15,17 +23,46 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Estado para "email no verificado"
+  const [notVerifiedEmail, setNotVerifiedEmail] = useState(null);
+  const [resending, setResending] = useState(false);
+  const [resendMsg, setResendMsg] = useState('');
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
+    setNotVerifiedEmail(null);
+    setResendMsg('');
     setLoading(true);
     try {
       await login(email, password);
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err.message || 'No se pudo iniciar sesión.');
+      if (err.data?.code === 'EMAIL_NOT_VERIFIED') {
+        setNotVerifiedEmail(err.data.email || email);
+        setError(err.message || 'Tenés que verificar tu email antes de ingresar.');
+      } else {
+        setError(err.message || 'No se pudo iniciar sesión.');
+      }
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleResend() {
+    if (!notVerifiedEmail) return;
+    setResending(true);
+    setResendMsg('');
+    try {
+      await api('/api/auth/resend-verification', {
+        method: 'POST',
+        body: { email: notVerifiedEmail },
+      });
+      setResendMsg('Te enviamos un nuevo link de verificación. Revisá tu email.');
+    } catch (err) {
+      setResendMsg(err.message || 'No se pudo reenviar el email.');
+    } finally {
+      setResending(false);
     }
   }
 
@@ -44,8 +81,38 @@ export default function Login() {
 
         {error && (
           <div className={styles.alert}>
-            <AlertCircle size={16} />
+            {notVerifiedEmail ? <MailWarning size={16} /> : <AlertCircle size={16} />}
             <span>{error}</span>
+          </div>
+        )}
+
+        {notVerifiedEmail && (
+          <div style={{ marginBottom: '1rem' }}>
+            {resendMsg ? (
+              <div
+                className={styles.alert}
+                style={{ background: '#ecfdf5', color: '#065f46', borderColor: '#a7f3d0' }}
+              >
+                <Mail size={16} />
+                <span>{resendMsg}</span>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className={styles.submitBtn}
+                onClick={handleResend}
+                disabled={resending}
+              >
+                {resending ? (
+                  'Reenviando...'
+                ) : (
+                  <>
+                    <RotateCw size={14} style={{ marginRight: 6 }} />
+                    Reenviar email de verificación
+                  </>
+                )}
+              </button>
+            )}
           </div>
         )}
 

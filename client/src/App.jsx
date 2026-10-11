@@ -25,6 +25,7 @@ import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Profile from './pages/Profile';
+import VerifyEmail from './pages/VerifyEmail';
 
 import {
   Activity,
@@ -119,6 +120,7 @@ function AppShell() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
       </Routes>
     );
   }

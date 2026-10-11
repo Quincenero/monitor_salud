@@ -1,12 +1,20 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { api } from '../utils/api';
 import styles from './AuthPages.module.css';
-import { Activity, AlertCircle, Mail, Lock, User } from 'lucide-react';
+import {
+  Activity,
+  AlertCircle,
+  Mail,
+  Lock,
+  User,
+  CheckCircle2,
+  RotateCw,
+} from 'lucide-react';
 
 export default function Register() {
   const { register } = useAuth();
-  const navigate = useNavigate();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -14,6 +22,11 @@ export default function Register() {
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Estado para el paso "verificá tu email"
+  const [submittedEmail, setSubmittedEmail] = useState(null);
+  const [resending, setResending] = useState(false);
+  const [resendMsg, setResendMsg] = useState('');
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -30,8 +43,10 @@ export default function Register() {
 
     setLoading(true);
     try {
-      await register(name, email, password);
-      navigate('/', { replace: true });
+      const data = await register(name, email, password);
+      if (data?.requiresVerification) {
+        setSubmittedEmail(data.email || email);
+      }
     } catch (err) {
       setError(err.message || 'No se pudo crear la cuenta.');
     } finally {
@@ -39,6 +54,74 @@ export default function Register() {
     }
   }
 
+  async function handleResend() {
+    setResending(true);
+    setResendMsg('');
+    try {
+      await api('/api/auth/resend-verification', {
+        method: 'POST',
+        body: { email: submittedEmail },
+      });
+      setResendMsg('Te enviamos un nuevo link de verificación.');
+    } catch (err) {
+      setResendMsg(err.message || 'No se pudo reenviar el email.');
+    } finally {
+      setResending(false);
+    }
+  }
+
+  // ------- Pantalla "Revisá tu email" -------
+  if (submittedEmail) {
+    return (
+      <div className={styles.authWrapper}>
+        <div className={styles.authCard}>
+          <div className={styles.brandRow}>
+            <div className={styles.successIcon}>
+              <CheckCircle2 size={22} />
+            </div>
+          </div>
+          <h1 className={styles.title}>Revisá tu email</h1>
+          <p className={styles.subtitle}>
+            Te enviamos un link de verificación a <strong>{submittedEmail}</strong>.
+            Abrilo para activar tu cuenta (válido 24 horas).
+          </p>
+
+          {resendMsg && (
+            <div className={styles.alert} style={{ background: '#ecfdf5', color: '#065f46', borderColor: '#a7f3d0' }}>
+              <CheckCircle2 size={16} />
+              <span>{resendMsg}</span>
+            </div>
+          )}
+
+          <button
+            type="button"
+            className={styles.submitBtn}
+            onClick={handleResend}
+            disabled={resending}
+            style={{ marginTop: '0.5rem' }}
+          >
+            {resending ? (
+              'Reenviando...'
+            ) : (
+              <>
+                <RotateCw size={14} style={{ marginRight: 6 }} />
+                Reenviar email
+              </>
+            )}
+          </button>
+
+          <div className={styles.footerLinks}>
+            <span>¿Ya verificaste?</span>
+            <Link to="/login" className={styles.link}>
+              Iniciar sesión
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ------- Formulario normal -------
   return (
     <div className={styles.authWrapper}>
       <div className={styles.authCard}>

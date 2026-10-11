@@ -1,59 +1,87 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
-let transporter = null;
+let resend = null;
 
-function escapeHtml(str = '') {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-function getTransporter() {
-  if (transporter) return transporter;
-
-  const host = process.env.SMTP_HOST;
-  const port = Number(process.env.SMTP_PORT || 587);
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-
-  if (!host || !user || !pass) {
-    console.warn('[mailer] SMTP no configurado. Los mails se van a loguear a consola.');
-    transporter = {
-      sendMail: async (opts) => {
-        console.log('\n📧 [MAILER - DEV] ------------------------------');
-        console.log('To:', opts.to);
-        console.log('Subject:', opts.subject);
-        console.log('---');
-        console.log(opts.text);
-        console.log('------------------------------------------------\n');
-        return { messageId: 'dev-mode' };
+function getResend() {
+  if (resend) return resend;
+  const key = process.env.RESEND_API_KEY;
+  if (!key) {
+    console.warn('[mailer] RESEND_API_KEY no configurada. Los mails se loguean a consola.');
+    // Dev fallback: simula el envío
+    resend = {
+      emails: {
+        send: async (opts) => {
+          console.log('\n📧 [MAILER - DEV] ------------------------------');
+          console.log('To:', opts.to);
+          console.log('Subject:', opts.subject);
+          console.log('---');
+          console.log(opts.text || '(sin texto)');
+          console.log('------------------------------------------------\n');
+          return { data: { id: 'dev-mode' }, error: null };
+        },
       },
     };
-    return transporter;
+    return resend;
   }
+  resend = new Resend(key);
+  return resend;
+}
 
-  transporter = nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465,
-    auth: { user, pass },
+const FROM = process.env.EMAIL_FROM || 'Monitor de Salud <onboarding@resend.dev>';
+
+export async function sendVerificationEmail({ to, name, verifyUrl }) {
+  const client = getResend();
+  const { error } = await client.emails.send({
+    from: FROM,
+    to,
+    subject: 'Verificá tu email — Monitor de Salud',
+    text: `Hola ${name},\n\nGracias por registrarte. Para activar tu cuenta, abrí este link (válido 24 horas):\n${verifyUrl}\n\nSi no fuiste vos, ignorá este mensaje.`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #0d9488;">Verificá tu email</h2>
+        <p>Hola <strong>${name}</strong>,</p>
+        <p>Gracias por registrarte en <strong>Monitor de Salud</strong>. Para activar tu cuenta, hacé click en el siguiente botón:</p>
+        <p style="text-align: center; margin: 30px 0;">
+          <a href="${verifyUrl}" style="background-color: #0d9488; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600;">
+            Verificar mi email
+          </a>
+        </p>
+        <p style="color: #64748b; font-size: 13px;">O copiá este link en tu navegador:<br/>${verifyUrl}</p>
+        <p style="color: #64748b; font-size: 13px;">El link expira en 24 horas. Si no creaste esta cuenta, ignorá este mensaje.</p>
+      </div>
+    `,
   });
-  return transporter;
+
+  if (error) {
+    console.error('[mailer] Error enviando verificación:', error);
+    throw new Error('No se pudo enviar el email de verificación.');
+  }
 }
 
 export async function sendPasswordResetEmail({ to, name, resetUrl }) {
-  const t = getTransporter();
-  await t.sendMail({
-    from: process.env.SMTP_FROM || '"Monitor de Salud" <no-reply@salud.local>',
+  const client = getResend();
+  const { error } = await client.emails.send({
+    from: FROM,
     to,
-    subject: 'Recuperación de contraseña',
+    subject: 'Recuperación de contraseña — Monitor de Salud',
     text: `Hola ${name},\n\nRecibimos un pedido para restablecer tu contraseña.\n\nAbrí este link (válido 30 minutos):\n${resetUrl}\n\nSi no fuiste vos, ignorá este mensaje.`,
-    html: `<p>Hola ${escapeHtml(name)},</p>
-           <p>Recibimos un pedido para restablecer tu contraseña.</p>
-           <p>Hacé click en el siguiente link (válido 30 minutos):</p>
-           <p><a href="${resetUrl}">${resetUrl}</a></p>
-           <p>Si no fuiste vos, ignorá este mensaje.</p>`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #0d9488;">Recuperar contraseña</h2>
+        <p>Hola <strong>${name}</strong>,</p>
+        <p>Recibimos un pedido para restablecer tu contraseña. Hacé click en el botón (válido 30 minutos):</p>
+        <p style="text-align: center; margin: 30px 0;">
+          <a href="${resetUrl}" style="background-color: #0d9488; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600;">
+            Restablecer contraseña
+          </a>
+        </p>
+        <p style="color: #64748b; font-size: 13px;">Si no fuiste vos, ignorá este mensaje.</p>
+      </div>
+    `,
   });
+
+  if (error) {
+    console.error('[mailer] Error enviando reset:', error);
+    throw new Error('No se pudo enviar el email.');
+  }
 }

@@ -14,6 +14,11 @@ const userSchema = new mongoose.Schema(
     },
     passwordHash: { type: String, required: true },
     tokenVersion: { type: Number, default: 0 },
+
+    // --- Verificación de email ---
+    emailVerified: { type: Boolean, default: false },
+    emailVerificationTokenHash: { type: String, default: null },
+    emailVerificationExpiresAt: { type: Date, default: null },
   },
   { timestamps: true }
 );
@@ -31,6 +36,7 @@ userSchema.methods.toSafeJSON = function () {
     id: this._id.toString(),
     name: this.name,
     email: this.email,
+    emailVerified: this.emailVerified ?? true, // undefined => true (por compatibilidad con usuarios antiguos)
     createdAt: this.createdAt,
   };
 };

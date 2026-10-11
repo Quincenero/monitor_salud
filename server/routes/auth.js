@@ -10,7 +10,12 @@ import {
   clearAuthCookie,
 } from '../utils/jwt.js';
 import { requireAuth } from '../middleware/auth.js';
-import { sendPasswordResetEmail } from '../utils/mailer.js';
+import {
+  generateVerificationToken,
+  hashVerificationToken,
+  buildVerificationUrl,
+} from '../utils/verification.js';
+import { sendPasswordResetEmail, sendVerificationEmail } from '../utils/mailer.js';
 import { getClientUrl } from '../utils/clientUrl.js';
 
 const router = Router();
@@ -93,12 +98,40 @@ router.post('/register', async (req, res, next) => {
         .json({ success: false, error: 'Ese email ya está registrado.' });
     }
 
-    const user = new User({ name: data.name, email });
+    // Generar token de verificación
+    const { raw, hash, expiresAt } = generateVerificationToken();
+
+    const user = new User({
+      name: data.name,
+      email,
+      emailVerified: false,
+      emailVerificationTokenHash: hash,
+      emailVerificationExpiresAt: expiresAt,
+    });
     await user.setPassword(data.password);
     await user.save();
 
-    setAuthCookie(res, signAuthToken(user));
-    res.status(201).json({ success: true, user: user.toSafeJSON() });
+    // Enviar email (si falla, NO bloqueamos el registro)
+    const verifyUrl = buildVerificationUrl(raw);
+    try {
+      await sendVerificationEmail({
+        to: user.email,
+        name: user.name,
+        verifyUrl,
+      });
+    } catch (mailErr) {
+      console.error('[auth] Error enviando verificación:', mailErr.message);
+      // El registro queda creado; el usuario puede pedir reenvío.
+    }
+
+    // NO logueamos automáticamente: primero debe verificar
+    res.status(201).json({
+      success: true,
+      message:
+        'Cuenta creada. Revisá tu email para verificar la cuenta antes de ingresar.',
+      requiresVerification: true,
+      email: user.email,
+    });
   } catch (err) {
     next(err);
   }
@@ -112,7 +145,6 @@ router.post('/login', loginLimiter, async (req, res, next) => {
 
     const user = await User.findOne({ email: data.email.toLowerCase() });
 
-    // Comparación con timing consistente: siempre ejecutamos un bcrypt.compare
     const ok = user
       ? await user.verifyPassword(data.password)
       : await User.dummyCompare(data.password);
@@ -121,6 +153,17 @@ router.post('/login', loginLimiter, async (req, res, next) => {
       return res
         .status(401)
         .json({ success: false, error: 'Email o contraseña incorrectos.' });
+    }
+
+    // Bloquear login si el email no está verificado.
+    // OJO: undefined se trata como true (usuarios viejos siguen funcionando).
+    if (user.emailVerified === false) {
+      return res.status(403).json({
+        success: false,
+        error: 'Tenés que verificar tu email antes de ingresar.',
+        code: 'EMAIL_NOT_VERIFIED',
+        email: user.email,
+      });
     }
 
     setAuthCookie(res, signAuthToken(user));
@@ -134,6 +177,100 @@ router.post('/login', loginLimiter, async (req, res, next) => {
 router.post('/logout', (req, res) => {
   clearAuthCookie(res);
   res.json({ success: true });
+});
+
+// ---------- Verify email ----------
+router.post('/verify-email', async (req, res, next) => {
+  try {
+    const { token } = req.body || {};
+    if (!token || typeof token !== 'string') {
+      return res
+        .status(400)
+        .json({ success: false, error: 'Token de verificación requerido.' });
+    }
+
+    const tokenHash = hashVerificationToken(token);
+
+    const user = await User.findOne({
+      emailVerificationTokenHash: tokenHash,
+      emailVerificationExpiresAt: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        error: 'Token inválido o expirado. Solicitá uno nuevo.',
+      });
+    }
+
+    user.emailVerified = true;
+    user.emailVerificationTokenHash = null;
+    user.emailVerificationExpiresAt = null;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Email verificado correctamente. Ya podés iniciar sesión.',
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ---------- Resend verification email ----------
+const resendLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hora
+  max: 3, // máximo 3 reenvíos por hora por IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: 'Demasiados reenvíos. Probá de nuevo en una hora.',
+  },
+});
+
+router.post('/resend-verification', resendLimiter, async (req, res, next) => {
+  try {
+    const { email } = req.body || {};
+    if (!email || typeof email !== 'string') {
+      return res
+        .status(400)
+        .json({ success: false, error: 'Email requerido.' });
+    }
+
+    const genericMsg =
+      'Si la cuenta existe y no está verificada, te enviamos un nuevo link.';
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.json({ success: true, message: genericMsg });
+    }
+
+    if (user.emailVerified) {
+      return res.json({ success: true, message: genericMsg });
+    }
+
+    // Generar token nuevo (invalida el anterior)
+    const { raw, hash, expiresAt } = generateVerificationToken();
+    user.emailVerificationTokenHash = hash;
+    user.emailVerificationExpiresAt = expiresAt;
+    await user.save();
+
+    const verifyUrl = buildVerificationUrl(raw);
+    try {
+      await sendVerificationEmail({
+        to: user.email,
+        name: user.name,
+        verifyUrl,
+      });
+    } catch (mailErr) {
+      console.error('[auth] Error reenviando verificación:', mailErr.message);
+    }
+
+    res.json({ success: true, message: genericMsg });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // ---------- Me ----------
