@@ -1,117 +1,167 @@
-# Monitor de Salud
+# 🩺 Monitor de Salud
 
-Aplicación web para registrar y visualizar glucemia, frecuencia cardíaca y presión arterial.
+Aplicación web para el registro y monitoreo personal de glucemia, frecuencia cardíaca (BPM) y presión arterial. Con autenticación de usuarios, verificación de email, gráficos de tendencias y clasificación clínica de valores según guías médicas (ADA, AHA/ACC).
 
-## Stack
+🌐 **Demo en vivo:** [monitorsalud.vercel.app](https://monitorsalud.vercel.app)
 
-- React + Vite
-- JavaScript (JS/JSX)
-- CSS Modules
-- Express + Node.js
-- MongoDB + Mongoose
-- Recharts
-- Lucide React
+---
 
-## Estructura
+## ✨ Features
 
-```text
-monitor-de-salud/
-├── client/
-│   ├── src/
-│   │   ├── components/
-│   │   └── utils/
-│   ├── index.html
-│   └── vite.config.js
-├── server/
-│   ├── app.js
-│   ├── index.js
-│   ├── db.js
-│   ├── routes/
-│   └── .env.example
-├── api/
-│   └── index.js
-├── package.json
-└── README.md
-```
+- **Autenticación completa** — registro, login, logout, recuperación de contraseña y verificación de email con tokens de un solo uso.
+- **Aislamiento de datos por usuario** — cada cuenta ve únicamente sus propios registros.
+- **Registro de mediciones** — glucemia, BPM, presión sistólica/diastólica, contexto (ayunas, postprandial, reposo, etc.) y notas.
+- **Clasificación clínica automática** — evaluación en tiempo real según guías médicas:
+  - Glucemia (ADA)
+  - Frecuencia cardíaca en reposo
+  - Presión arterial (AHA/ACC)
+- **Gráficos interactivos** — tendencias temporales con filtros por rango y por métrica (Recharts).
+- **Historial completo** — búsqueda, filtros, edición y eliminación de registros.
+- **Exportación a CSV** — para compartir con profesionales de la salud.
+- **Guía médica integrada** — rangos clínicos de referencia consultables desde la app.
+- **Responsive** — experiencia optimizada en desktop, tablet y móvil.
+- **Seguridad** — JWT en cookies httpOnly, Helmet, rate limiting, bcrypt para passwords.
 
-## Requisitos
+---
+
+## 🛠️ Stack técnico
+
+### Frontend
+- **React 19** + **Vite 8**
+- **React Router 7** para routing SPA
+- **Recharts 3** para gráficos
+- **Lucide React** para iconografía
+- **CSS Modules** para estilos encapsulados
+
+### Backend
+- **Node.js** + **Express 4**
+- **MongoDB Atlas** + **Mongoose 9**
+- **JWT** (jsonwebtoken) para sesiones
+- **bcryptjs** para hash de contraseñas
+- **Zod** para validación de payloads
+- **Helmet** para headers de seguridad
+- **express-rate-limit** para limitar intentos
+
+### Emails
+- **Resend** para envío de emails transaccionales (verificación + reset password)
+
+### Deploy
+- **Vercel** — frontend estático + backend serverless (funciones)
+- **MongoDB Atlas** — base de datos en la nube
+
+---
+
+## 🚀 Instalación local
+
+### Requisitos previos
 
 - Node.js 20+
-- MongoDB local o MongoDB Atlas
+- Cuenta de [MongoDB Atlas](https://www.mongodb.com/atlas) (o MongoDB local)
+- Cuenta de [Resend](https://resend.com) (opcional para desarrollo)
 
-## Instalación
+### Pasos
 
 ```bash
+# 1. Clonar el repositorio
+git clone https://github.com/TQuincenero/monitor-salud.git
+cd monitor-salud
+
+# 2. Instalar dependencias (workspaces)
 npm install
-```
 
-Configura MongoDB:
+# 3. Configurar variables de entorno
+cp server/.env.example server/.env
+# Editar server/.env con tus credenciales
 
-```bash
-copy server\.env.example server\.env
-```
+# 4. Levantar backend y frontend en terminales separadas
+# Terminal 1
+cd server && npm run dev
 
-Edita `server/.env` y coloca tu `MONGODB_URI`.
+# Terminal 2
+cd client && npm run dev
 
-Ejemplo para MongoDB local:
+Abrí http://localhost:5173 en el navegador.
 
-```env
+# Base de datos
+MONGODB_URI=mongodb+srv://usuario:password@cluster.mongodb.net/monitor_salud
+
+# JWT
+JWT_SECRET=un_string_largo_y_aleatorio_de_32_o_mas_caracteres
+JWT_EXPIRES_IN=7d
+
+# Servidor
 PORT=5000
+NODE_ENV=development
 CLIENT_URL=http://localhost:5173
-MONGODB_URI=mongodb://127.0.0.1:27017/monitor_salud
-```
 
-## Desarrollo
+# Emails (opcional en desarrollo — sin esto los mails se loguean a consola)
+RESEND_API_KEY=re_tu_api_key
+EMAIL_FROM=Monitor de Salud <onboarding@resend.dev>
 
-Ejecuta frontend y backend juntos:
+📁 Estructura del proyecto
 
-```bash
-npm run dev
-```
 
-- Frontend: http://localhost:5173
-- API Express: http://localhost:5000
-- API de salud: http://localhost:5000/api/health
+monitor-salud/
+├── api/                      # Entry point serverless para Vercel
+│   └── index.js
+├── client/                   # Frontend React + Vite
+│   ├── public/
+│   ├── src/
+│   │   ├── components/       # Componentes reutilizables
+│   │   ├── context/          # AuthContext
+│   │   ├── hooks/            # useAuth
+│   │   ├── pages/            # Login, Register, Dashboard, etc.
+│   │   ├── utils/            # api.js, healthEvaluations.js
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   ├── index.html
+│   └── vite.config.js
+├── server/                   # Backend Express
+│   ├── middleware/           # auth, errors
+│   ├── models/               # User, HealthRecord, PasswordResetToken
+│   ├── routes/               # auth, records
+│   ├── utils/                # jwt, mailer, verification, clientUrl
+│   ├── app.js                # Configuración de Express
+│   ├── index.js              # Entry para desarrollo local
+│   └── db.js                 # Conexión a MongoDB
+├── package.json              # Workspaces
+├── vercel.json               # Configuración de deploy
+└── README.md
 
-Vite redirige `/api/*` al servidor Express mediante proxy.
+📜 Scripts disponibles
 
-## Despliegue en Vercel
+cd client && npm run dev      # Solo frontend
+cd server && npm run dev      # Solo backend (con --watch)
 
-El repo ya está preparado: el frontend (Vite) se sirve como estático y la API Express corre como una única función serverless (`api/index.js`) que carga `server/app.js`.
+🔒 Seguridad
 
-1. Importá el repo en Vercel (Root Directory: la raíz del repo; el resto lo toma de `vercel.json`).
-2. En **Settings → Environment Variables** cargá:
+• Contraseñas hasheadas con bcrypt (12 rounds).
+• JWT almacenado en cookie httpOnly + SameSite=Lax (no accesible desde JS).
+• Verificación de email obligatoria antes del primer login.
+• Rate limiting en /login, /forgot-password, /resend-verification.
+• Helmet con CSP, HSTS, X-Frame-Options, etc.
+• Tokens de verificación y reset hasheados en la base de datos (SHA-256).
+• Aislamiento por usuario verificado en todas las queries.
+• Cookies secure en producción (solo HTTPS).
 
-| Variable | Valor |
-| --- | --- |
-| `MONGODB_URI` | cadena de conexión de MongoDB Atlas |
-| `JWT_SECRET` | secreto largo (`openssl rand -hex 32`) |
-| `CLIENT_URL` | URL pública, ej. `https://tu-app.vercel.app` (se usa en CORS y en el link del mail de recuperación) |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` | opcionales; sin SMTP el mail solo se loguea |
+🌐 Deploy
+El proyecto está deployado en Vercel con la siguiente configuración:
 
-3. En MongoDB Atlas → **Network Access**, permití conexiones desde `0.0.0.0/0` (las IPs de Vercel no son fijas).
-4. Deploy. Verificá con `https://tu-app.vercel.app/api/health`.
+• Frontend: build estático de Vite (client/dist).
+• Backend: función serverless (api/index.js) que carga la app Express.
+• Base de datos: MongoDB Atlas (cluster M0 gratuito).
+• Routing: /api/* va a la función, todo lo demás sirve el SPA.
 
-Notas:
+📝 Notas
 
-- `NODE_ENV` lo define Vercel (`production`); no lo cargues a mano.
-- Los rate limiters usan memoria, así que el límite es por instancia serverless. Para un límite global habría que usar un store externo (Redis/Upstash).
-- Nunca subas `server/.env` a git (ya está en `.gitignore`).
+• La app es de monitoreo personal y no reemplaza el diagnóstico ni el           tratamiento médico profesional.
+• Los rangos clínicos están basados en guías oficiales (ADA, AHA/ACC) pero pueden variar según el contexto del paciente.
 
-## Instalar como app (PWA)
+## 📄 Licencia
 
-La app es instalable en Android (y iOS) sin pasar por ninguna tienda:
+Este proyecto está bajo la licencia [MIT](./LICENSE). Podés usarlo, modificarlo y distribuirlo libremente con atribución.
 
-- **Android (Chrome):** abrí la URL de Vercel, tocá el menú ⋮ → **Instalar app** (o **Agregar a la pantalla principal**). Queda con ícono propio y se abre a pantalla completa.
-- **iPhone (Safari):** botón Compartir → **Agregar a inicio**.
+ 👤 Autor
+Marco Espinoza
 
-Detalles técnicos: `client/public/manifest.webmanifest`, `client/public/sw.js` e íconos en `client/public/icons/`. El service worker cachea solo la interfaz; las llamadas a `/api/*` (datos de salud y sesión) **nunca** se cachean, así que sin conexión se ve la app pero no los registros. Requiere HTTPS (Vercel ya lo da).
-
-## Producción local (sin Vercel)
-
-```bash
-npm run build
-npm start
-```
-
-`npm start` levanta solo la API; para servir `client/dist` habría que agregar `express.static` en `server/index.js`.
+GitHub: @Quincenero
