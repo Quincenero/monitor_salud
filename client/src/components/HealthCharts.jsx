@@ -43,6 +43,11 @@ export const HealthCharts = ({ records }) => {
       );
     }
 
+    // Filtrar registros sin ningún valor
+    filtered = filtered.filter(
+      (r) => r.glucose != null || r.bpm != null || r.systolic != null || r.diastolic != null
+    );
+
     // Sort ascending for chart x-axis
     filtered.sort(
       (a, b) => new Date(a.measuredAt).getTime() - new Date(b.measuredAt).getTime()

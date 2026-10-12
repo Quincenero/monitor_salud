@@ -8,10 +8,11 @@ const healthRecordSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
-    glucose: { type: Number, required: true, min: 1, max: 600 },
-    bpm: { type: Number, required: true, min: 1, max: 250 },
-    systolic: { type: Number, required: true, min: 1, max: 260 },
-    diastolic: { type: Number, required: true, min: 1, max: 160 },
+    // Todos opcionales. null = no medido en este registro.
+    glucose: { type: Number, min: 1, max: 600, default: null },
+    bpm: { type: Number, min: 1, max: 250, default: null },
+    systolic: { type: Number, min: 1, max: 260, default: null },
+    diastolic: { type: Number, min: 1, max: 160, default: null },
     context: {
       type: String,
       enum: ['ayunas', 'postprandial', 'reposo', 'actividad', 'noche', 'otro'],
@@ -72,10 +73,10 @@ function normalizeRecord(record) {
   return {
     id: record._id.toString(),
     _id: record._id.toString(),
-    glucose: record.glucose,
-    bpm: record.bpm,
-    systolic: record.systolic,
-    diastolic: record.diastolic,
+    glucose: record.glucose ?? null,
+    bpm: record.bpm ?? null,
+    systolic: record.systolic ?? null,
+    diastolic: record.diastolic ?? null,
     context: record.context,
     notes: record.notes,
     measuredAt: record.measuredAt,
@@ -94,7 +95,16 @@ export async function getAllRecords(userId, { limit = 200, skip = 0 } = {}) {
 }
 
 export async function createRecord(userId, data) {
-  const record = await HealthRecord.create({ userId, ...data });
+  const record = await HealthRecord.create({
+    userId,
+    glucose: data.glucose ?? null,
+    bpm: data.bpm ?? null,
+    systolic: data.systolic ?? null,
+    diastolic: data.diastolic ?? null,
+    context: data.context,
+    notes: data.notes,
+    measuredAt: data.measuredAt,
+  });
   return normalizeRecord(record);
 }
 
@@ -129,23 +139,4 @@ export async function deleteRecord(userId, id) {
   if (!mongoose.isValidObjectId(id)) return false;
   const deleted = await HealthRecord.findOneAndDelete({ _id: id, userId });
   return Boolean(deleted);
-}
-
-export async function seedSampleRecords(userId) {
-  const now = Date.now();
-  const samples = [
-    { glucose: 92, bpm: 68, systolic: 118, diastolic: 76, context: 'ayunas', notes: 'Despertar normal, buen descanso', measuredAt: new Date(now - 4 * 86400000) },
-    { glucose: 128, bpm: 74, systolic: 122, diastolic: 79, context: 'postprandial', notes: '2 horas después del almuerzo', measuredAt: new Date(now - 4 * 86400000 + 5 * 3600000) },
-    { glucose: 96, bpm: 72, systolic: 116, diastolic: 74, context: 'ayunas', notes: 'En ayunas antes del desayuno', measuredAt: new Date(now - 3 * 86400000) },
-    { glucose: 135, bpm: 82, systolic: 126, diastolic: 82, context: 'postprandial', notes: 'Almuerzo con pasta', measuredAt: new Date(now - 3 * 86400000 + 6 * 3600000) },
-    { glucose: 88, bpm: 65, systolic: 115, diastolic: 72, context: 'noche', notes: 'Antes de dormir en reposo', measuredAt: new Date(now - 2 * 86400000) },
-    { glucose: 94, bpm: 70, systolic: 120, diastolic: 78, context: 'ayunas', notes: 'Control matutino', measuredAt: new Date(now - 86400000) },
-    { glucose: 102, bpm: 86, systolic: 125, diastolic: 81, context: 'actividad', notes: 'Después de caminata de 30 min', measuredAt: new Date(now - 86400000 + 8 * 3600000) },
-    { glucose: 91, bpm: 69, systolic: 117, diastolic: 75, context: 'ayunas', notes: 'Control de hoy por la mañana', measuredAt: new Date(now - 2 * 3600000) },
-  ].map((s) => ({ ...s, userId }));
-
-  const records = await HealthRecord.insertMany(samples);
-  return records
-    .map(normalizeRecord)
-    .sort((a, b) => new Date(b.measuredAt) - new Date(a.measuredAt));
 }

@@ -51,7 +51,7 @@ function AppShell() {
 
   const [records, setRecords] = useState([]);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
-  const [isSeeding, setIsSeeding] = useState(false);
+  
 
   // Cargar registros solo si hay sesión
   useEffect(() => {
@@ -215,21 +215,6 @@ function AppShell() {
                   <HealthSummary
                     records={records}
                     onOpenNewRecord={() => navigate('/new')}
-                    onSeedSampleData={async () => {
-                      setIsSeeding(true);
-                      try {
-                        const data = await api('/api/records/seed', {
-                          method: 'POST',
-                        });
-                        setRecords(data.records);
-                      } catch (err) {
-                        if (err.status === 401)
-                          console.error('Error al cargar seed: ', err.message);
-                      } finally {
-                        setIsSeeding(false);
-                      }
-                    }}
-                    isSeeding={isSeeding}
                   />
                   {records.length > 0 && <HealthCharts records={records} />}
                   {records.length > 0 && (

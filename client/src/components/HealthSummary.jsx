@@ -1,16 +1,9 @@
 import React from 'react';
 import styles from './HealthSummary.module.css';
-import {evaluateGlucose, evaluateBpm, evaluateBloodPressure } from '../utils/healthEvaluations';
-import { Droplets, Heart, Activity, ArrowUpRight, ArrowDownRight, Clock, PlusCircle } from 'lucide-react';
+import { evaluateGlucose, evaluateBpm, evaluateBloodPressure } from '../utils/healthEvaluations';
+import { Droplets, Heart, Activity, Clock, PlusCircle } from 'lucide-react';
 
-
-
-export const HealthSummary = ({
-  records,
-  onOpenNewRecord,
-  onSeedSampleData,
-  isSeeding = false,
-}) => {
+export const HealthSummary = ({ records, onOpenNewRecord }) => {
   if (records.length === 0) {
     return (
       <div className={styles.summaryGrid}>
@@ -18,60 +11,52 @@ export const HealthSummary = ({
           <Activity size={36} color="#0d9488" style={{ margin: '0 auto' }} />
           <h3 className={styles.emptyTitle}>Aún no hay mediciones registradas</h3>
           <p className={styles.emptyDesc}>
-            Comienza ingresando tus valores diarios de glucemia, ritmo cardíaco (BPM) y presión arterial,
-            o carga registros de demostración para explorar los gráficos y monitoreo.
+            Comenzá ingresando tus valores de glucemia, ritmo cardíaco (BPM) o presión arterial.
           </p>
-          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button
-              type="button"
-              className={styles.statusBadge}
-              style={{
-                backgroundColor: '#0d9488',
-                color: '#ffffff',
-                padding: '0.6rem 1.25rem',
-                fontSize: '0.85rem',
-                cursor: 'pointer',
-                border: 'none',
-              }}
-              onClick={onOpenNewRecord}
-            >
-              <PlusCircle size={16} />
-              <span>Ingresar primer registro</span>
-            </button>
-            <button
-              type="button"
-              className={styles.statusBadge}
-              style={{
-                backgroundColor: '#f1f5f9',
-                color: '#334155',
-                padding: '0.6rem 1.25rem',
-                fontSize: '0.85rem',
-                cursor: 'pointer',
-                border: '1px solid #cbd5e1',
-              }}
-              onClick={onSeedSampleData}
-              disabled={isSeeding}
-            >
-              <span>{isSeeding ? 'Cargando datos...' : 'Cargar datos de ejemplo'}</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={onOpenNewRecord}
+            style={{
+              backgroundColor: '#0d9488',
+              color: '#ffffff',
+              padding: '0.6rem 1.25rem',
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              border: 'none',
+              borderRadius: '8px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              marginTop: '0.75rem',
+            }}
+          >
+            <PlusCircle size={16} />
+            <span>Ingresar primer registro</span>
+          </button>
         </div>
       </div>
     );
   }
 
-  // Latest record
   const latest = records[0];
 
-  // Averages across all records
-  const avgGlucose = Math.round(records.reduce((acc, r) => acc + r.glucose, 0) / records.length);
-  const avgBpm = Math.round(records.reduce((acc, r) => acc + r.bpm, 0) / records.length);
-  const avgSys = Math.round(records.reduce((acc, r) => acc + r.systolic, 0) / records.length);
-  const avgDia = Math.round(records.reduce((acc, r) => acc + r.diastolic, 0) / records.length);
+  // Promedios: solo de los registros que tienen el campo (no null)
+  const avg = (key) => {
+    const arr = records.map((r) => r[key]).filter((v) => v != null);
+    return arr.length ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : null;
+  };
 
-  const glucoseEval = evaluateGlucose(latest.glucose, latest.context);
-  const bpmEval = evaluateBpm(latest.bpm, latest.context);
-  const bpEval = evaluateBloodPressure(latest.systolic, latest.diastolic);
+  const avgGlucose = avg('glucose');
+  const avgBpm = avg('bpm');
+  const avgSys = avg('systolic');
+  const avgDia = avg('diastolic');
+
+  const glucoseEval = latest.glucose != null ? evaluateGlucose(latest.glucose, latest.context) : null;
+  const bpmEval = latest.bpm != null ? evaluateBpm(latest.bpm, latest.context) : null;
+  const bpEval =
+    latest.systolic != null && latest.diastolic != null
+      ? evaluateBloodPressure(latest.systolic, latest.diastolic)
+      : null;
 
   const formatDate = (dateStr) => {
     try {
@@ -114,19 +99,37 @@ export const HealthSummary = ({
           </span>
         </div>
 
-        <div className={styles.valueRow}>
-          <span className={styles.primaryValue}>{latest.glucose}</span>
-          <span className={styles.unit}>mg/dL</span>
-        </div>
-
-        <div className={`${styles.statusBadge} ${getStatusClass(glucoseEval.level)}`}>
-          {glucoseEval.label}
-        </div>
-
-        <div className={styles.statsFooter}>
-          <span className={styles.avgLabel}>Promedio histórico:</span>
-          <span className={styles.avgValue}>{avgGlucose} mg/dL</span>
-        </div>
+        {latest.glucose != null ? (
+          <>
+            <div className={styles.valueRow}>
+              <span className={styles.primaryValue}>{latest.glucose}</span>
+              <span className={styles.unit}>mg/dL</span>
+            </div>
+            {glucoseEval && (
+              <div className={`${styles.statusBadge} ${getStatusClass(glucoseEval.level)}`}>
+                {glucoseEval.label}
+              </div>
+            )}
+            <div className={styles.statsFooter}>
+              <span className={styles.avgLabel}>Promedio histórico:</span>
+              <span className={styles.avgValue}>
+                {avgGlucose != null ? `${avgGlucose} mg/dL` : '—'}
+              </span>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className={styles.valueRow}>
+              <span className={styles.primaryValue} style={{ color: '#cbd5e1' }}>—</span>
+            </div>
+            <div className={styles.statsFooter}>
+              <span className={styles.avgLabel}>Sin medición reciente</span>
+              <span className={styles.avgValue}>
+                {avgGlucose != null ? `${avgGlucose} mg/dL` : '—'}
+              </span>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Tarjeta BPM */}
@@ -144,22 +147,40 @@ export const HealthSummary = ({
           </span>
         </div>
 
-        <div className={styles.valueRow}>
-          <span className={styles.primaryValue}>{latest.bpm}</span>
-          <span className={styles.unit}>LPM (latidos/min)</span>
-        </div>
-
-        <div className={`${styles.statusBadge} ${getStatusClass(bpmEval.level)}`}>
-          {bpmEval.label}
-        </div>
-
-        <div className={styles.statsFooter}>
-          <span className={styles.avgLabel}>Promedio en reposo:</span>
-          <span className={styles.avgValue}>{avgBpm} lpm</span>
-        </div>
+        {latest.bpm != null ? (
+          <>
+            <div className={styles.valueRow}>
+              <span className={styles.primaryValue}>{latest.bpm}</span>
+              <span className={styles.unit}>LPM</span>
+            </div>
+            {bpmEval && (
+              <div className={`${styles.statusBadge} ${getStatusClass(bpmEval.level)}`}>
+                {bpmEval.label}
+              </div>
+            )}
+            <div className={styles.statsFooter}>
+              <span className={styles.avgLabel}>Promedio en reposo:</span>
+              <span className={styles.avgValue}>
+                {avgBpm != null ? `${avgBpm} lpm` : '—'}
+              </span>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className={styles.valueRow}>
+              <span className={styles.primaryValue} style={{ color: '#cbd5e1' }}>—</span>
+            </div>
+            <div className={styles.statsFooter}>
+              <span className={styles.avgLabel}>Sin medición reciente</span>
+              <span className={styles.avgValue}>
+                {avgBpm != null ? `${avgBpm} lpm` : '—'}
+              </span>
+            </div>
+          </>
+        )}
       </div>
 
-      {/* Tarjeta Presión Arterial */}
+      {/* Tarjeta Presión */}
       <div className={styles.metricCard}>
         <div className={styles.cardHeader}>
           <div className={styles.cardTitleWrap}>
@@ -174,21 +195,39 @@ export const HealthSummary = ({
           </span>
         </div>
 
-        <div className={styles.valueRow}>
-          <span className={styles.primaryValue}>
-            {latest.systolic} / {latest.diastolic}
-          </span>
-          <span className={styles.unit}>mmHg</span>
-        </div>
-
-        <div className={`${styles.statusBadge} ${getStatusClass(bpEval.level)}`}>
-          {bpEval.label}
-        </div>
-
-        <div className={styles.statsFooter}>
-          <span className={styles.avgLabel}>Promedio histórico:</span>
-          <span className={styles.avgValue}>{avgSys} / {avgDia} mmHg</span>
-        </div>
+        {latest.systolic != null && latest.diastolic != null ? (
+          <>
+            <div className={styles.valueRow}>
+              <span className={styles.primaryValue}>
+                {latest.systolic} / {latest.diastolic}
+              </span>
+              <span className={styles.unit}>mmHg</span>
+            </div>
+            {bpEval && (
+              <div className={`${styles.statusBadge} ${getStatusClass(bpEval.level)}`}>
+                {bpEval.label}
+              </div>
+            )}
+            <div className={styles.statsFooter}>
+              <span className={styles.avgLabel}>Promedio histórico:</span>
+              <span className={styles.avgValue}>
+                {avgSys != null && avgDia != null ? `${avgSys} / ${avgDia} mmHg` : '—'}
+              </span>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className={styles.valueRow}>
+              <span className={styles.primaryValue} style={{ color: '#cbd5e1' }}>—</span>
+            </div>
+            <div className={styles.statsFooter}>
+              <span className={styles.avgLabel}>Sin medición reciente</span>
+              <span className={styles.avgValue}>
+                {avgSys != null && avgDia != null ? `${avgSys} / ${avgDia} mmHg` : '—'}
+              </span>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

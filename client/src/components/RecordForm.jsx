@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styles from './RecordForm.module.css';
 import {evaluateGlucose, evaluateBpm, evaluateBloodPressure } from '../utils/healthEvaluations';
 import { Activity, Heart, Droplets, CheckCircle2, AlertCircle, Calendar, FileText } from 'lucide-react';
-
+import { api } from '../utils/api';
 
 
 export const RecordForm = ({
@@ -53,39 +53,48 @@ export const RecordForm = ({
     setErrorMsg(null);
     setSuccessMsg(null);
 
-    if (!glucose || !bpm || !systolic || !diastolic) {
-      setErrorMsg('Por favor completa todos los valores obligatorios: glucemia, bpm y presión arterial.');
+    const parse = (v) => (v === '' || v === null || v === undefined ? null : Number(v));
+    const g = parse(glucose);
+    const b = parse(bpm);
+    const s = parse(systolic);
+    const d = parse(diastolic);
+
+    if (g === null && b === null && s === null && d === null) {
+      setErrorMsg('Ingresá al menos un valor.');
       return;
     }
-
-    const g = Number(glucose);
-    const b = Number(bpm);
-    const s = Number(systolic);
-    const d = Number(diastolic);
-
-    if (isNaN(g) || isNaN(b) || isNaN(s) || isNaN(d) || g <= 0 || b <= 0 || s <= 0 || d <= 0) {
-      setErrorMsg('Ingresa valores numéricos válidos mayores a cero.');
+    if (g !== null && (isNaN(g) || g <= 0)) {
+      setErrorMsg('Glucemia inválida.');
       return;
     }
-
-    if (s <= d) {
-      setErrorMsg('La presión sistólica (máxima) debe ser mayor a la diastólica (mínima).');
+    if (b !== null && (isNaN(b) || b <= 0)) {
+      setErrorMsg('BPM inválido.');
       return;
+    }
+    if ((s === null) !== (d === null)) {
+      setErrorMsg('Para presión arterial ingresá sistólica y diastólica juntas.');
+      return;
+    }
+    if (s !== null && d !== null) {
+      if (isNaN(s) || isNaN(d) || s <= 0 || d <= 0) {
+        setErrorMsg('Valores de presión inválidos.');
+        return;
+      }
+      if (s <= d) {
+        setErrorMsg('La presión sistólica debe ser mayor a la diastólica.');
+        return;
+      }
     }
 
     setIsSubmitting(true);
-
     try {
-      const url = initialData?.id || initialData?._id 
-        ? `/api/records/${initialData.id || initialData._id}` 
-        : '/api/records';
-      
-      const method = initialData?.id || initialData?._id ? 'PUT' : 'POST';
+      const isEditing = initialData?.id || initialData?._id;
+      const url = isEditing ? `/api/records/${initialData.id || initialData._id}` : '/api/records';
+      const method = isEditing ? 'PUT' : 'POST';
 
-      const res = await fetch(url, {
+      const data = await api(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        body: {
           glucose: g,
           bpm: b,
           systolic: s,
@@ -93,19 +102,13 @@ export const RecordForm = ({
           context,
           notes,
           measuredAt: new Date(measuredAt).toISOString(),
-        }),
+        },
       });
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Error al guardar el registro');
-      }
-
-      setSuccessMsg(initialData ? 'Registro actualizado con éxito.' : 'Registro guardado exitosamente.');
+      setSuccessMsg(isEditing ? 'Registro actualizado con éxito.' : 'Registro guardado exitosamente.');
       onRecordSaved(data.record);
 
-      if (!initialData) {
-        // Reset form for next entry
+      if (!isEditing) {
         setGlucose('');
         setBpm('');
         setSystolic('');
@@ -114,7 +117,9 @@ export const RecordForm = ({
         setMeasuredAt(formatDateTimeLocal());
       }
     } catch (err) {
-      setErrorMsg(err.message || 'Error de conexión con el servidor');
+      if (err.status !== 401) {
+        setErrorMsg(err.message || 'Error de conexión con el servidor');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -138,7 +143,7 @@ export const RecordForm = ({
             {initialData ? 'Modificar Registro de Salud' : 'Nuevo Registro de Salud'}
           </h2>
           <p className={styles.formDesc}>
-            Ingresa tus parámetros de glucosa, pulso y presión para el seguimiento médico.
+            Ingresá al menos una medición. Los campos vacíos se guardan como <em>no medidos</em>.
           </p>
         </div>
       </div>
@@ -178,7 +183,7 @@ export const RecordForm = ({
                 placeholder="ej. 95"
                 value={glucose}
                 onChange={(e) => setGlucose(e.target.value)}
-                required
+                
               />
               <span className={styles.unitSuffix}>mg/dL</span>
             </div>
@@ -208,7 +213,7 @@ export const RecordForm = ({
                 placeholder="ej. 72"
                 value={bpm}
                 onChange={(e) => setBpm(e.target.value)}
-                required
+                
               />
               <span className={styles.unitSuffix}>lpm</span>
             </div>
@@ -240,7 +245,6 @@ export const RecordForm = ({
                   value={systolic}
                   onChange={(e) => setSystolic(e.target.value)}
                   title="Presión Sistólica (Alta)"
-                  required
                 />
                 <span className={styles.unitSuffix}>SYS</span>
               </div>
@@ -256,7 +260,7 @@ export const RecordForm = ({
                   value={diastolic}
                   onChange={(e) => setDiastolic(e.target.value)}
                   title="Presión Diastólica (Baja)"
-                  required
+                  
                 />
                 <span className={styles.unitSuffix}>DIA</span>
               </div>

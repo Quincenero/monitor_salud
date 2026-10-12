@@ -210,10 +210,13 @@ export const RecordsList = ({
               </tr>
             ) : (
               filteredRecords.map((r) => {
-                const recordId = r.id || r._id || '';
-                const gEval = evaluateGlucose(r.glucose, r.context);
-                const bEval = evaluateBpm(r.bpm, r.context);
-                const bpEval = evaluateBloodPressure(r.systolic, r.diastolic);
+                const recordId = r.id || r._id || ''; 
+
+                const gEval = r.glucose != null ? evaluateGlucose(r.glucose, r.context) : null;
+                const bEval = r.bpm != null ? evaluateBpm(r.bpm, r.context) : null;
+                const bpEval = r.systolic != null && r.diastolic != null
+                  ? evaluateBloodPressure(r.systolic, r.diastolic)
+                  : null;
 
                 return (
                   <tr key={recordId} className={styles.tr}>
@@ -225,34 +228,50 @@ export const RecordsList = ({
 
                     {/* Glucemia */}
                     <td className={styles.td}>
-                      <div className={styles.valCell}>
-                        <span className={styles.valMain}>{r.glucose} <small style={{ fontWeight: 500, color: '#64748b' }}>mg/dL</small></span>
-                        <span className={styles.valSub} style={{ color: getStatusColor(gEval.level) }}>
-                          {gEval.label.split('(')[0]}
-                        </span>
-                      </div>
+                      {r.glucose != null ? (
+                        <div className={styles.valCell}>
+                          <span className={styles.valMain}>
+                            {r.glucose} <small style={{ fontWeight: 500, color: '#64748b' }}>mg/dL</small>
+                          </span>
+                          <span className={styles.valSub} style={{ color: getStatusColor(gEval.level) }}>
+                            {gEval.label.split('(')[0]}
+                          </span>
+                        </div>
+                      ) : (
+                        <span style={{ color: '#cbd5e1' }}>—</span>
+                      )}
                     </td>
 
                     {/* BPM */}
                     <td className={styles.td}>
-                      <div className={styles.valCell}>
-                        <span className={styles.valMain}>{r.bpm} <small style={{ fontWeight: 500, color: '#64748b' }}>lpm</small></span>
-                        <span className={styles.valSub} style={{ color: getStatusColor(bEval.level) }}>
-                          {bEval.label.split('(')[0]}
-                        </span>
-                      </div>
+                      {r.bpm != null ? (
+                        <div className={styles.valCell}>
+                          <span className={styles.valMain}>
+                            {r.bpm} <small style={{ fontWeight: 500, color: '#64748b' }}>lpm</small>
+                          </span>
+                          <span className={styles.valSub} style={{ color: getStatusColor(bEval.level) }}>
+                            {bEval.label.split('(')[0]}
+                          </span>
+                        </div>
+                      ) : (
+                        <span style={{ color: '#cbd5e1' }}>—</span>
+                      )}
                     </td>
 
                     {/* Presión */}
                     <td className={styles.td}>
-                      <div className={styles.valCell}>
-                        <span className={styles.valMain}>
-                          {r.systolic} / {r.diastolic} <small style={{ fontWeight: 500, color: '#64748b' }}>mmHg</small>
-                        </span>
-                        <span className={styles.valSub} style={{ color: getStatusColor(bpEval.level) }}>
-                          {bpEval.label.split('(')[0]}
-                        </span>
-                      </div>
+                      {r.systolic != null && r.diastolic != null ? (
+                        <div className={styles.valCell}>
+                          <span className={styles.valMain}>
+                            {r.systolic} / {r.diastolic} <small style={{ fontWeight: 500, color: '#64748b' }}>mmHg</small>
+                          </span>
+                          <span className={styles.valSub} style={{ color: getStatusColor(bpEval.level) }}>
+                            {bpEval.label.split('(')[0]}
+                          </span>
+                        </div>
+                      ) : (
+                        <span style={{ color: '#cbd5e1' }}>—</span>
+                      )}
                     </td>
 
                     {/* Momento */}
