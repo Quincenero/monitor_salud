@@ -10,10 +10,12 @@ export const RecordForm = ({
   initialData,
   onCancel,
 }) => {
-  const [glucose, setGlucose] = useState(initialData ? String(initialData.glucose) : '');
-  const [bpm, setBpm] = useState(initialData ? String(initialData.bpm) : '');
-  const [systolic, setSystolic] = useState(initialData ? String(initialData.systolic) : '');
-  const [diastolic, setDiastolic] = useState(initialData ? String(initialData.diastolic) : '');
+  const toInputValue = (v) => (v === null || v === undefined ? '' : String(v));
+
+  const [glucose, setGlucose] = useState(toInputValue(initialData?.glucose));
+  const [bpm, setBpm] = useState(toInputValue(initialData?.bpm));
+  const [systolic, setSystolic] = useState(toInputValue(initialData?.systolic));
+  const [diastolic, setDiastolic] = useState(toInputValue(initialData?.diastolic));
   const [context, setContext] = useState(initialData?.context || 'ayunas');
   const [notes, setNotes] = useState(initialData?.notes || '');
   
