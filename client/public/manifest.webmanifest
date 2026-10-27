@@ -1,6 +1,6 @@
 {
   "name": "Monitor de Salud",
-  "short_name": "Salud",
+  "short_name": "Health Monitor",
   "description": "Registrá y visualizá glucemia, frecuencia cardíaca y presión arterial.",
   "lang": "es",
   "start_url": "/?source=pwa",
